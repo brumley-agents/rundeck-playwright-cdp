@@ -1,0 +1,22 @@
+{
+  "name": "rundeck-playwright-cdp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright project for Rundeck access through an already-open Edge or Chrome session",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "browser:edge:start": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\start-browser.ps1 -Browser edge",
+    "browser:chrome:start": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\start-browser.ps1 -Browser chrome",
+    "browser:status": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\browser-status.ps1",
+    "rundeck:open": "playwright test src/openRundeck.ts",
+    "rundeck:acloud:get-account-details": "playwright test src/runAcloudGetAccountDetails.ts",
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^24.6.0",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.9.3"
+  }
+}

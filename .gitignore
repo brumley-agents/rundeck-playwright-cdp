@@ -1,0 +1,13 @@
+node_modules
+node_modules/
+dist/
+playwright-report/
+test-results/
+.env
+
+auth/*.json
+auth/*.log
+auth/edge-user-data/
+auth/edge-cdp-user-data/
+auth/chrome-cdp-user-data/
+screenshots/*.png

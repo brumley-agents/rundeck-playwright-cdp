@@ -6,7 +6,7 @@ Use this page to decide which document to open first.
 
 Open:
 
-- [docs/QUICK_START.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/QUICK_START.md)
+- [docs/QUICK_START.md](docs/QUICK_START.md)
 
 Use this if you are a day-to-day user and only need to run the Rundeck account lookup.
 
@@ -14,7 +14,7 @@ Use this if you are a day-to-day user and only need to run the Rundeck account l
 
 Open:
 
-- [docs/HANDOFF.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/HANDOFF.md)
+- [docs/HANDOFF.md](docs/HANDOFF.md)
 
 Use this if you need the cleanest single-file handoff for onboarding a team or reducing setup friction.
 
@@ -22,7 +22,7 @@ Use this if you need the cleanest single-file handoff for onboarding a team or r
 
 Open:
 
-- [docs/IMPLEMENTATION_GUIDE.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/IMPLEMENTATION_GUIDE.md)
+- [docs/IMPLEMENTATION_GUIDE.md](docs/IMPLEMENTATION_GUIDE.md)
 
 Use this if you need the technical setup steps, environment details, and troubleshooting guidance.
 
@@ -30,9 +30,9 @@ Use this if you need the technical setup steps, environment details, and trouble
 
 For most teams:
 
-1. Read [docs/HANDOFF.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/HANDOFF.md).
-2. Give end users [docs/QUICK_START.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/QUICK_START.md).
-3. Use [docs/IMPLEMENTATION_GUIDE.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/IMPLEMENTATION_GUIDE.md) only when deeper setup or troubleshooting is needed.
+1. Read [docs/HANDOFF.md](docs/HANDOFF.md).
+2. Give end users [docs/QUICK_START.md](docs/QUICK_START.md).
+3. Use [docs/IMPLEMENTATION_GUIDE.md](docs/IMPLEMENTATION_GUIDE.md) only when deeper setup or troubleshooting is needed.
 
 ## Key Things New Users Usually Miss
 

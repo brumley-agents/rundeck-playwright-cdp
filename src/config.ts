@@ -96,6 +96,3 @@ export function getCdpUrl(): string {
   return `http://${getCdpHost()}:${getCdpPort()}`;
 }
 
-export function getOptionalBrowserProfileDirectory(): string | undefined {
-  return getOptionalEnv('RUNDECK_BROWSER_PROFILE_DIRECTORY');
-}

@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { connectToBrowser } from './browser';
 import {
   getAcloudJobPath,
@@ -38,27 +38,20 @@ type JobResult = {
   tenants: TenantRecord[];
 };
 
+type TailExecutionOutput = {
+  completed?: boolean;
+  execCompleted?: boolean;
+  entries?: Array<{
+    log?: string;
+  }>;
+};
+
 type DebugPausePoint = 'before-run' | 'after-run' | 'execution-page' | 'output-page';
 
 const EXECUTION_TIMEOUT_MS = 180_000;
 const MANUAL_LOGIN_TIMEOUT_MS = 10 * 60_000;
 const POST_RUN_NAVIGATION_TIMEOUT_MS = 20_000;
 test.setTimeout(EXECUTION_TIMEOUT_MS + 30_000);
-
-function readCliOption(flag: string): string | undefined {
-  const args = process.argv.slice(2);
-  const exactMatch = args.find((arg) => arg.startsWith(`${flag}=`));
-  if (exactMatch) {
-    return exactMatch.slice(flag.length + 1).trim() || undefined;
-  }
-
-  const flagIndex = args.indexOf(flag);
-  if (flagIndex >= 0) {
-    return args[flagIndex + 1]?.trim() || undefined;
-  }
-
-  return undefined;
-}
 
 function normalizeCloudOrg(value: string): string {
   const trimmed = value.trim();
@@ -76,18 +69,18 @@ function normalizeCloudOrg(value: string): string {
 }
 
 function getJobInputs(): JobInputs {
-  const cloudOrg = normalizeCloudOrg(readCliOption('--cloud-org') || getOptionalEnv('RUNDECK_CLOUD_ORG') || '');
-  const ticketNumber = readCliOption('--ticket') || getOptionalEnv('RUNDECK_TICKET_NUMBER');
+  const cloudOrg = normalizeCloudOrg(getOptionalEnv('RUNDECK_CLOUD_ORG') || '');
+  const ticketNumber = getOptionalEnv('RUNDECK_TICKET_NUMBER');
 
   if (!cloudOrg) {
     throw new Error(
-      'Missing cloud org. Provide --cloud-org "<value>" or set RUNDECK_CLOUD_ORG in .env.'
+      'Missing cloud org. Set RUNDECK_CLOUD_ORG in .env or pass it as an environment variable.'
     );
   }
 
   if (!ticketNumber) {
     throw new Error(
-      'Missing ticket number. Provide --ticket "<value>" or set RUNDECK_TICKET_NUMBER in .env.'
+      'Missing ticket number. Set RUNDECK_TICKET_NUMBER in .env or pass it as an environment variable.'
     );
   }
 
@@ -221,13 +214,10 @@ function extractTenantsFromSections(lines: string[]): TenantRecord[] {
       const remainder = line.slice(line.indexOf(ids[1]) + ids[1].length).trim();
       const nameMatch = remainder.match(/^(.+?)\s+\d+\s+(?:True|False)\s+\d+\s+(?:True|False)\s+/i);
       const tenantName = normalizeNameCandidate(nameMatch?.[1] || '');
-      if (!tenantName) {
-        continue;
-      }
 
       tenants.push({
         id: ids[1],
-        name: tenantName
+        ...(tenantName ? { name: tenantName } : {})
       });
     }
   }
@@ -321,7 +311,7 @@ async function startJobRun(page: Page): Promise<void> {
   const startingUrl = page.url();
   await runButton.click();
 
-  await Promise.race([
+  const navigationResult = await Promise.race([
     page
       .waitForURL(
         (url) => {
@@ -330,13 +320,26 @@ async function startJobRun(page: Page): Promise<void> {
         },
         { timeout: POST_RUN_NAVIGATION_TIMEOUT_MS }
       )
+      .then(() => 'navigated' as const)
       .catch(() => undefined),
     page
       .locator('a[href*="/execution/output/"], a[href*="/execution/follow/"], a[href*="/execution/show/"]')
       .first()
       .waitFor({ state: 'visible', timeout: POST_RUN_NAVIGATION_TIMEOUT_MS })
+      .then(() => 'link-visible' as const)
       .catch(() => undefined)
   ]);
+
+  if (!navigationResult) {
+    const bodyText = await page.locator('body').innerText().catch(() => '');
+    const hint = /error|denied|failed/i.test(bodyText)
+      ? ` Page body contains error text: "${bodyText.slice(0, 200)}"`
+      : '';
+    throw new Error(
+      `Job run button was clicked but no execution page or link appeared within ${POST_RUN_NAVIGATION_TIMEOUT_MS / 1_000}s. ` +
+      `The job may not have started.${hint}`
+    );
+  }
 }
 
 function isExecutionUrl(url: string): boolean {
@@ -397,71 +400,86 @@ async function openExecutionOutput(page: Page): Promise<void> {
   ]);
 }
 
-async function clickRowOrToggle(page: Page, rowText: RegExp): Promise<void> {
-  const row = page
-    .locator('tr, li, div')
-    .filter({ hasText: rowText })
-    .first();
-
-  await expect(row).toBeVisible({ timeout: 15_000 });
-
-  const toggleCandidates = [
-    row.locator('button, a, [role="button"], .glyphicon, .fas, .far, .fa, .arrow, .expand, .toggle').first(),
-    row.locator('xpath=.//*[self::button or self::a or @role="button"][1]').first(),
-    row.locator('xpath=.//*[contains(@class,"glyphicon") or contains(@class,"icon") or contains(@class,"toggle")][1]').first()
-  ];
-
-  for (const candidate of toggleCandidates) {
-    if ((await candidate.count()) === 0) {
-      continue;
-    }
-
-    if (await candidate.isVisible().catch(() => false)) {
-      await candidate.click({ force: true }).catch(() => undefined);
-      await page.waitForTimeout(500);
-      return;
-    }
-  }
-
-  await row.click({ force: true }).catch(() => undefined);
-  await page.waitForTimeout(500);
+function getExecutionIdFromUrl(url: string): string | undefined {
+  const match = url.match(/\/execution\/(?:show|follow|output)\/(\d+)/i);
+  return match?.[1];
 }
 
-async function expandExecutionNodeAndOpenStepOutput(page: Page): Promise<void> {
-  const bodyText = await page.locator('body').innerText().catch(() => '');
-  if (/organization details/i.test(bodyText) || /organization administrators/i.test(bodyText)) {
-    return;
+async function getExecutionId(page: Page): Promise<string | undefined> {
+  const fromUrl = getExecutionIdFromUrl(page.url());
+  if (fromUrl) {
+    return fromUrl;
   }
 
-  await clickRowOrToggle(page, /^sre-toolbox$/i);
+  const execInfoText = await page.locator('#execInfoJSON').textContent().catch(() => '');
+  if (!execInfoText) {
+    return undefined;
+  }
 
-  const scriptStep = page.locator('tr, li, div').filter({ hasText: /^\d+\.\s+.*script$/i }).first();
-  await expect(scriptStep).toBeVisible({ timeout: 15_000 });
-  await clickRowOrToggle(page, /^\d+\.\s+.*script$/i);
-  await page.waitForTimeout(1_000);
+  try {
+    const parsed = JSON.parse(execInfoText) as { execId?: string | number };
+    return parsed.execId ? String(parsed.execId) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function fetchTailExecutionOutput(page: Page, executionId: string): Promise<TailExecutionOutput> {
+  if (!/^\d+$/.test(executionId)) {
+    throw new Error(`Invalid execution ID (expected numeric): ${executionId}`);
+  }
+
+  return page.evaluate(async (id) => {
+    const response = await fetch(`/execution/tailExecutionOutput/${id}.json`, {
+      credentials: 'same-origin'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load tail execution output for ${id}: HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }, executionId);
 }
 
 async function waitForExecutionOutput(page: Page): Promise<string> {
-  const initialBodyText = await page.locator('body').innerText().catch(() => '');
-  if (!extractIdsFromText(initialBodyText).organizationIds.length) {
-    await expandExecutionNodeAndOpenStepOutput(page).catch(() => undefined);
+  const executionId = await getExecutionId(page);
+  if (!executionId) {
+    throw new Error(`Could not determine execution id from page URL: ${page.url()}`);
   }
+
+  let capturedOutput = '';
+  let jobCompleted = false;
 
   await expect
     .poll(
       async () => {
-        const bodyText = await page.locator('body').innerText();
-        const parsed = extractIdsFromText(bodyText);
-        return JSON.stringify(parsed);
+        const tailOutput = await fetchTailExecutionOutput(page, executionId);
+        capturedOutput = (tailOutput.entries || [])
+          .map((entry) => entry.log || '')
+          .join('\n');
+        jobCompleted = !!(tailOutput.completed || tailOutput.execCompleted);
+
+        const parsed = extractIdsFromText(capturedOutput);
+        const foundIds = parsed.organizationIds.length > 0 && parsed.tenants.length > 0;
+
+        if (jobCompleted && !foundIds) {
+          throw new Error(
+            'Rundeck job completed but no organization IDs or tenants were found in the output. ' +
+            'The job may have failed or produced unexpected output.'
+          );
+        }
+
+        return foundIds;
       },
       {
         timeout: EXECUTION_TIMEOUT_MS,
         intervals: [1_000, 2_000, 5_000]
       }
     )
-    .not.toBe(JSON.stringify({ organizationIds: [], tenants: [] }));
+    .toBe(true);
 
-  return page.locator('body').innerText();
+  return capturedOutput;
 }
 
 async function waitForAuthenticatedRundeckPage(page: Page, expectedPath: string): Promise<void> {
@@ -496,10 +514,6 @@ async function waitForAuthenticatedRundeckPage(page: Page, expectedPath: string)
     .toBe(true);
 }
 
-async function createRunContext(): Promise<{ browser: Browser; context: BrowserContext; page: Page }> {
-  return connectToBrowser();
-}
-
 test('run Acloud-Get-Account-Details-SUPPORT and extract IDs', async () => {
   const { baseUrl } = getConfig();
   const { cloudOrg, ticketNumber } = getJobInputs();
@@ -507,7 +521,7 @@ test('run Acloud-Get-Account-Details-SUPPORT and extract IDs', async () => {
   const debugPausePoints = getDebugPausePoints();
 
   await ensureDirectories();
-  const { page } = await createRunContext();
+  const { page } = await connectToBrowser();
 
   try {
     await page.goto(jobUrl, { waitUntil: 'domcontentloaded' });

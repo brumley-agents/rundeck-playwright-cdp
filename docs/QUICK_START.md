@@ -2,7 +2,7 @@
 
 This document is the short business-facing handoff for users who only need to run the Rundeck account lookup.
 
-Full technical setup guide: [IMPLEMENTATION_GUIDE.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/IMPLEMENTATION_GUIDE.md)
+Full technical setup guide: [IMPLEMENTATION_GUIDE.md](docs/IMPLEMENTATION_GUIDE.md)
 
 ## Purpose
 
@@ -207,11 +207,11 @@ Provide:
 
 Primary technical reference:
 
-- [IMPLEMENTATION_GUIDE.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/IMPLEMENTATION_GUIDE.md)
+- [IMPLEMENTATION_GUIDE.md](docs/IMPLEMENTATION_GUIDE.md)
 
 Useful files when escalating an issue:
 
-- [scripts/launch-rundeck-account-details.ps1](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/scripts/launch-rundeck-account-details.ps1)
-- [screenshots/](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/screenshots)
-- [test-results/](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/test-results)
-- [auth/launcher.log](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/auth/launcher.log)
+- [scripts/launch-rundeck-account-details.ps1](scripts/launch-rundeck-account-details.ps1)
+- [screenshots/](screenshots)
+- [test-results/](test-results)
+- [auth/launcher.log](auth/launcher.log)

@@ -1,6 +1,6 @@
 # Rundeck Playwright CDP Implementation Guide
 
-Quick start for non-technical users: [QUICK_START.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/QUICK_START.md)
+Quick start for non-technical users: [QUICK_START.md](../docs/QUICK_START.md)
 
 This guide is for users who need to run the Rundeck Playwright automation in their own environment with the least amount of guesswork.
 
@@ -63,13 +63,13 @@ Recommended versions:
 
 Files most users need to care about:
 
-- [package.json](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/package.json)
-- [.env.example](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/.env.example)
-- [scripts/start-browser.ps1](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/scripts/start-browser.ps1)
-- [scripts/browser-status.ps1](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/scripts/browser-status.ps1)
-- [scripts/launch-rundeck-account-details.ps1](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/scripts/launch-rundeck-account-details.ps1)
-- [src/openRundeck.ts](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/src/openRundeck.ts)
-- [src/runAcloudGetAccountDetails.ts](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/src/runAcloudGetAccountDetails.ts)
+- [package.json](../package.json)
+- [.env.example](../.env.example)
+- [scripts/start-browser.ps1](../scripts/start-browser.ps1)
+- [scripts/browser-status.ps1](../scripts/browser-status.ps1)
+- [scripts/launch-rundeck-account-details.ps1](../scripts/launch-rundeck-account-details.ps1)
+- [src/openRundeck.ts](../src/openRundeck.ts)
+- [src/runAcloudGetAccountDetails.ts](../src/runAcloudGetAccountDetails.ts)
 
 ## Setup
 
@@ -301,10 +301,10 @@ This guide’s current code already fixes that by normalizing the URL to the org
 
 Useful output locations:
 
-- screenshots: [screenshots/](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/screenshots)
-- test artifacts: [test-results/](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/test-results)
-- launcher state: [auth/launcher-state.json](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/auth/launcher-state.json)
-- launcher log: [auth/launcher.log](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/auth/launcher.log)
+- screenshots: [screenshots/](../screenshots)
+- test artifacts: [test-results/](../test-results)
+- launcher state: [auth/launcher-state.json](../auth/launcher-state.json)
+- launcher log: [auth/launcher.log](../auth/launcher.log)
 
 When a test fails, inspect:
 

@@ -20,18 +20,16 @@ $ErrorActionPreference = "Stop"
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location $projectRoot
 
+$env:RUNDECK_CLOUD_ORG = $CloudOrg
+$env:RUNDECK_TICKET_NUMBER = $TicketNumber
+
 $argsList = @(
   $PlaywrightCliPath,
   "test",
-  "src/runAcloudGetAccountDetails.ts",
-  "--",
-  "--cloud-org",
-  $CloudOrg,
-  "--ticket",
-  $TicketNumber
+  "src/runAcloudGetAccountDetails.ts"
 )
 
-"Command: $NodePath $($argsList -join ' ')" | Tee-Object -FilePath $OutputPath -Append
+"Command: $NodePath $($argsList -join ' ') (RUNDECK_CLOUD_ORG=$CloudOrg, RUNDECK_TICKET_NUMBER=$TicketNumber)" | Tee-Object -FilePath $OutputPath -Append
 
 try {
   & $NodePath @argsList 2>&1 | Tee-Object -FilePath $OutputPath -Append

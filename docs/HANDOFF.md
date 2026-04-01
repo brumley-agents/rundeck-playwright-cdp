@@ -6,8 +6,8 @@ If you only share one document with a new user, use this one.
 
 Related documents:
 
-- [QUICK_START.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/QUICK_START.md)
-- [IMPLEMENTATION_GUIDE.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/IMPLEMENTATION_GUIDE.md)
+- [QUICK_START.md](../docs/QUICK_START.md)
+- [IMPLEMENTATION_GUIDE.md](../docs/IMPLEMENTATION_GUIDE.md)
 
 ## What This Tool Does
 
@@ -275,13 +275,13 @@ If a user still cannot run the tool, ask for:
 
 - the input they used
 - whether `npm run browser:status` worked
-- the latest screenshot from [screenshots/](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/screenshots)
-- the latest files under [test-results/](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/test-results)
-- [auth/launcher.log](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/auth/launcher.log)
+- the latest screenshot from [screenshots/](../screenshots)
+- the latest files under [test-results/](../test-results)
+- [auth/launcher.log](../auth/launcher.log)
 
 ## Primary References
 
-- [QUICK_START.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/QUICK_START.md)
-- [IMPLEMENTATION_GUIDE.md](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/docs/IMPLEMENTATION_GUIDE.md)
-- [scripts/launch-rundeck-account-details.ps1](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/scripts/launch-rundeck-account-details.ps1)
-- [src/runAcloudGetAccountDetails.ts](/mnt/c/Users/andrew.brumley/rundeck-playwright-cdp/src/runAcloudGetAccountDetails.ts)
+- [QUICK_START.md](../docs/QUICK_START.md)
+- [IMPLEMENTATION_GUIDE.md](../docs/IMPLEMENTATION_GUIDE.md)
+- [scripts/launch-rundeck-account-details.ps1](../scripts/launch-rundeck-account-details.ps1)
+- [src/runAcloudGetAccountDetails.ts](../src/runAcloudGetAccountDetails.ts)

@@ -35,16 +35,3 @@ export function escapeRegExp(value: string): string {
 export function unique(values: string[]): string[] {
   return [...new Set(values)];
 }
-
-export async function describePage(page: Page): Promise<string> {
-  const [url, title, bodyText] = await Promise.all([
-    page.url(),
-    page.title().catch(() => ''),
-    page.locator('body').innerText().catch(() => '')
-  ]);
-
-  const normalizedBody = bodyText.replace(/\s+/g, ' ').trim();
-  const preview = normalizedBody ? normalizedBody.slice(0, 400) : '<empty body>';
-
-  return `URL: ${url || '<empty>'}; Title: ${title || '<empty>'}; Body preview: ${preview}`;
-}

@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { connectToBrowser } from './browser';
 import { getCdpUrl, getConfig } from './config';
-import { buildUrl, captureScreenshot, ensureDirectories, formatError } from './utils';
+import { buildUrl, captureScreenshot, ensureDirectories, escapeRegExp, formatError } from './utils';
 
 test('open the configured Rundeck target page', async () => {
   const { baseUrl, targetPath } = getConfig();
@@ -15,7 +15,7 @@ test('open the configured Rundeck target page', async () => {
     await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
 
-    await expect(page).toHaveURL(new RegExp(targetPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    await expect(page).toHaveURL(new RegExp(escapeRegExp(targetPath)));
     await expect(page.locator('body')).not.toContainText(/sign in|log in/i);
 
     const screenshotPath = await captureScreenshot(page, 'target-page.png');

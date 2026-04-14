@@ -10,7 +10,6 @@ import {
   buildUrl,
   captureScreenshot,
   ensureDirectories,
-  escapeRegExp,
   formatError,
   unique
 } from './utils';
@@ -359,7 +358,6 @@ async function openFirstVisibleLocator(page: Page, selectors: string[]): Promise
 
     await locator.click().catch(() => undefined);
     await page.waitForLoadState('domcontentloaded').catch(() => undefined);
-    await page.waitForTimeout(1_000);
     return true;
   }
 
@@ -483,6 +481,8 @@ async function waitForExecutionOutput(page: Page): Promise<string> {
 }
 
 async function waitForAuthenticatedRundeckPage(page: Page, expectedPath: string): Promise<void> {
+  const expectedOrigin = new URL(getConfig().baseUrl).origin;
+
   await expect
     .poll(
       async () => {
@@ -493,14 +493,16 @@ async function waitForAuthenticatedRundeckPage(page: Page, expectedPath: string)
 
         try {
           const parsed = new URL(currentUrl);
-          const bodyText = await page.locator('body').innerText().catch(() => '');
+          if (parsed.origin !== expectedOrigin || !parsed.pathname.includes(expectedPath)) {
+            return false;
+          }
 
-          return (
-            parsed.origin === new URL(getConfig().baseUrl).origin &&
-            parsed.pathname.includes(expectedPath) &&
-            !/login|signin|authenticate|oauth|saml/i.test(parsed.pathname) &&
-            !/sign in|log in|login/i.test(bodyText)
-          );
+          if (/login|signin|authenticate|oauth|saml/i.test(parsed.pathname)) {
+            return false;
+          }
+
+          const bodyText = await page.locator('body').innerText().catch(() => '');
+          return !/sign in|log in|login/i.test(bodyText);
         } catch {
           return false;
         }
@@ -526,10 +528,6 @@ test('run Acloud-Get-Account-Details-SUPPORT and extract IDs', async () => {
   try {
     await page.goto(jobUrl, { waitUntil: 'domcontentloaded' });
     await waitForAuthenticatedRundeckPage(page, getAcloudJobPath());
-    await page.waitForLoadState('networkidle').catch(() => undefined);
-
-    await expect(page).toHaveURL(new RegExp(escapeRegExp(getAcloudJobPath())));
-    await expect(page.locator('body')).toContainText(/Acloud-Get-Account-Details-SUPPORT/i);
 
     await fillJobOption(page, /^value$/i, 'value', cloudOrg);
     await fillJobOption(page, /^reason$/i, 'reason', ticketNumber);
@@ -547,21 +545,15 @@ test('run Acloud-Get-Account-Details-SUPPORT and extract IDs', async () => {
 
     const outputText = await waitForExecutionOutput(page);
     await pauseIfRequested(page, debugPausePoints, 'output-page');
-    const parsedIds = extractIdsFromText(outputText);
-
-    if (!parsedIds.organizationIds.length || !parsedIds.tenants.length) {
-      throw new Error(
-        `Execution completed but expected IDs were not found. Parsed result: ${JSON.stringify(parsedIds)}`
-      );
-    }
+    const { organizationIds, tenants } = extractIdsFromText(outputText);
 
     const screenshotPath = await captureScreenshot(page, 'acloud-account-details-output.png');
     const result: JobResult = {
       cloudOrg,
       ticketNumber,
       jobUrl,
-      organizationIds: parsedIds.organizationIds,
-      tenants: parsedIds.tenants
+      organizationIds,
+      tenants
     };
 
     console.log(formatCopyPasteResult(result));

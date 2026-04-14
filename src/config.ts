@@ -13,8 +13,6 @@ type RequiredConfig = {
   targetPath: string;
 };
 
-type SupportedBrowser = 'edge' | 'chrome';
-
 function getRequiredEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -67,11 +65,6 @@ export function getOptionalBrowserChannel(): string | undefined {
 
 export function getOptionalBrowserExecutablePath(): string | undefined {
   return normalizeBrowserPath(process.env.RUNDECK_BROWSER_EXECUTABLE_PATH);
-}
-
-export function getBrowserType(): SupportedBrowser {
-  const configured = getOptionalEnv('RUNDECK_BROWSER')?.toLowerCase();
-  return configured === 'chrome' ? 'chrome' : 'edge';
 }
 
 export function getCdpHost(): string {

@@ -53,19 +53,33 @@ Create the `.env` file from the template:
 cd ~/.claude/skills/rundeck-org-info && cp .env.example .env
 ```
 
-Now ask the engineer for their environment values. At minimum they need:
+**IMPORTANT:** The `.env.example` ships with placeholder values that will NOT work. You must walk the engineer through replacing them.
 
-1. **Rundeck URL** — "What is your Rundeck base URL?" (e.g., `https://rundeck.uipath.com`)
-2. **Target path** — "What Rundeck path should be used for the auth check?" (e.g., `/project/UiPath/jobs`)
+Ask the engineer these questions one at a time and update `.env` with their answers:
 
-Update the `.env` file with their answers:
+1. **"What is your Rundeck base URL?"**
+   Example: `https://rundeck.uipath.com`
+   Update: `RUNDECK_BASE_URL=<their answer>`
 
+2. **"What Rundeck path should I use to verify you're logged in?"**
+   Example: `/project/UiPath/jobs` or any Rundeck page they can access.
+   Update: `RUNDECK_TARGET_PATH=<their answer>`
+
+3. **"Do you use Edge or Chrome?"**
+   Update: `RUNDECK_BROWSER=edge` or `RUNDECK_BROWSER=chrome`
+
+4. **"Is your browser installed in the default location?"**
+   Default Edge: `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`
+   Default Chrome: `C:\Program Files\Google\Chrome\Application\chrome.exe`
+   If not, ask for the full path and update `RUNDECK_EDGE_EXECUTABLE_PATH` or `RUNDECK_CHROME_EXECUTABLE_PATH`.
+
+After updating, verify the `.env` has no leftover placeholder values:
+
+```bash
+grep -n "example.com\|/project/example" ~/.claude/skills/rundeck-org-info/.env
 ```
-RUNDECK_BASE_URL=<their-rundeck-url>
-RUNDECK_TARGET_PATH=<their-target-path>
-```
 
-The other values in `.env` have sensible defaults. Only change them if the engineer says their setup differs (different browser, different CDP port, non-standard install paths).
+If that returns any matches, the engineer still has placeholder values that need to be replaced. Ask them for the correct values before continuing.
 
 ## Step 4 — Register the Skill
 

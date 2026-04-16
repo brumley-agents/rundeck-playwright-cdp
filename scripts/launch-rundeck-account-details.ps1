@@ -335,7 +335,7 @@ function Start-TrackedProcess {
   )
 
   New-Item -ItemType Directory -Path $stateDirectory -Force | Out-Null
-  $combinedPath = $Process.PSObject.Properties["CombinedOutputPath"]?.Value
+  $combinedPath = $Process.PSObject.Properties["CombinedOutputPath"].Value
 
   $script:activeProcess = $Process
   $script:activeStdoutPath = $combinedPath
